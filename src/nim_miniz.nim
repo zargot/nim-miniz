@@ -885,7 +885,12 @@ proc add_file*(zip: var Zip, path: string, archivePath:string="") =
   var arcPath = path.cstring
   if archivePath != "":
     arcPath = archivePath.cstring
-  doAssert zip.c.addr.mz_zip_writer_add_file(archivePath, path.cstring, comment, 0, cast[mz_uint](3'u16 or MZ_ZIP_FLAG_CASE_SENSITIVE.uint16)) == MZ_TRUE
+  when defined windows:
+      let wpath = newWideCString(path)
+      let path_ptr = cast[cstring](wpath[0].addr)
+  else:
+      let path_ptr = path.cstring
+  doAssert zip.c.addr.mz_zip_writer_add_file(archivePath, path_ptr, comment, 0, cast[mz_uint](3'u16 or MZ_ZIP_FLAG_CASE_SENSITIVE.uint16)) == MZ_TRUE
 
 proc close*(zip: var Zip) =
   if zip.mode == fmWrite:
