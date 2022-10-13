@@ -3,35 +3,35 @@
 import strutils
 
 when defined(i386) or defined(ia64):
-    const 
+    const
       MINIZ_X86_OR_X64_CPU* = 1
   # when little endian...
-  #const 
+  #const
   #  MINIZ_LITTLE_ENDIAN* = 1
-when defined(MINIZ_X86_OR_X64_CPU): 
+when defined(MINIZ_X86_OR_X64_CPU):
   # Set MINIZ_USE_UNALIGNED_LOADS_AND_STORES to 1 on CPU's that permit efficient integer loads and stores from unaligned addresses.
-  const 
+  const
     MINIZ_USE_UNALIGNED_LOADS_AND_STORES* = 1
-when defined(ia64): 
+when defined(ia64):
   # Set MINIZ_HAS_64BIT_REGISTERS to 1 if operations on 64-bit integers are reasonably fast (and don't involve compiler generated calls to helper functions).
-  const 
+  const
     MINIZ_HAS_64BIT_REGISTERS* = 1
 # ------------------- zlib-style API Definitions.
 # For more compatibility with zlib, miniz.c uses unsigned long for some parameters/struct members. Beware: mz_ulong can be either 32 or 64-bits!
 
-type 
+type
   mz_ulong* = culong
 
 # mz_free() internally uses the MZ_FREE() macro (which by default calls free() unless you've modified the MZ_MALLOC macro) to release a block allocated from the heap.
 
 proc mz_free*(p: pointer) {.importc.}
-const 
+const
   MZ_ADLER32_INIT* = (1)
 
 # mz_adler32() returns the initial adler-32 value to use when called with ptr==NULL.
 
 proc mz_adler32*(adler: mz_ulong, pointr: ptr cuchar, buf_len: csize): mz_ulong {.importc.}
-const 
+const
   MZ_CRC32_INIT* = (0)
 
 # mz_crc32() returns the initial CRC-32 value to use when called with ptr==NULL.
@@ -39,7 +39,7 @@ const
 proc mz_crc32*(crc: mz_ulong; pointr: ptr cuchar; buf_len: csize): mz_ulong {.importc.}
 # Compression strategies.
 
-const 
+const
   MZ_DEFAULT_STRATEGY* = 0
   MZ_FILTERED* = 1
   MZ_HUFFMAN_ONLY* = 2
@@ -48,18 +48,18 @@ const
 
 # Method
 
-const 
+const
   MZ_DEFLATED* = 8
 
-when not(defined(MINIZ_NO_ZLIB_APIS)): 
+when not(defined(MINIZ_NO_ZLIB_APIS)):
   # Heap allocation callbacks.
   # Note that mz_alloc_func parameter types purpsosely differ from zlib's: items/size is size_t, not unsigned long.
-  type 
+  type
     mz_alloc_func* = proc (opaque: pointer; items: csize; size: csize): pointer {.noconv.}
     mz_free_func* = proc (opaque: pointer; address: pointer)  {.noconv.}
-    mz_realloc_func* = proc (opaque: pointer; address: pointer; items: csize; 
+    mz_realloc_func* = proc (opaque: pointer; address: pointer; items: csize;
                              size: csize): pointer {.noconv.}
-  const 
+  const
     MZ_VERSION* = "9.1.15"
     MZ_VERNUM* = 0x000091F0
     MZ_VER_MAJOR* = 9
@@ -67,7 +67,7 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
     MZ_VER_REVISION* = 15
     MZ_VER_SUBREVISION* = 0
   # Flush values. For typical usage you only need MZ_NO_FLUSH and MZ_FINISH. The other values are for advanced use (refer to the zlib docs).
-  const 
+  const
     MZ_NO_FLUSH* = 0
     MZ_PARTIAL_FLUSH* = 1
     MZ_SYNC_FLUSH* = 2
@@ -75,7 +75,7 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
     MZ_FINISH* = 4
     MZ_BLOCK* = 5
   # Return status codes. MZ_PARAM_ERROR is non-standard.
-  const 
+  const
     MZ_OK* = 0
     MZ_STREAM_END* = 1
     MZ_NEED_DICT* = 2
@@ -87,7 +87,7 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
     MZ_VERSION_ERROR* = - 6
     MZ_PARAM_ERROR* = - 10000
   # Compression levels: 0-9 are the standard zlib-style levels, 10 is best possible compression (not zlib compatible, and may be very slow), MZ_DEFAULT_COMPRESSION=MZ_DEFAULT_LEVEL.
-  const 
+  const
     MZ_NO_COMPRESSION* = 0
     MZ_BEST_SPEED* = 1
     MZ_BEST_COMPRESSION* = 9
@@ -95,14 +95,14 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
     MZ_DEFAULT_LEVEL* = 6
     MZ_DEFAULT_COMPRESSION* = - 1
   # Window bits
-  const 
+  const
     MZ_DEFAULT_WINDOW_BITS* = 15
-  type 
-    mz_internal_state* = object 
-    
+  type
+    mz_internal_state* = object
+
   # Compression/decompression stream struct.
-  type 
-    mz_stream* = object 
+  type
+    mz_stream* = object
       next_in*: ptr cuchar    # pointer to next byte to read
       avail_in*: cuint        # number of bytes available at next_in
       total_in*: mz_ulong     # total number of bytes consumed so far
@@ -117,7 +117,7 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
       data_type*: cint        # data_type (unused)
       adler*: mz_ulong        # adler32 of the source or uncompressed data
       reserved*: mz_ulong     # not used
-    
+
     mz_streamp* = ptr mz_stream
   # Returns the version string of miniz.c.
   proc mz_version*(): cstring {.importc.}
@@ -138,7 +138,7 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
   #   method must be MZ_DEFLATED
   #   window_bits must be MZ_DEFAULT_WINDOW_BITS (to wrap the deflate stream with zlib header/adler-32 footer) or -MZ_DEFAULT_WINDOW_BITS (raw deflate/no header or footer)
   #   mem_level must be between [1, 9] (it's checked but ignored by miniz.c)
-  proc mz_deflateInit2*(pStream: mz_streamp; level: cint; meth: cint; 
+  proc mz_deflateInit2*(pStream: mz_streamp; level: cint; meth: cint;
                         window_bits: cint; mem_level: cint; strategy: cint): cint {.importc.}
   # Quickly resets a compressor without having to reallocate anything. Same as calling mz_deflateEnd() followed by mz_deflateInit()/mz_deflateInit2().
   proc mz_deflateReset*(pStream: mz_streamp): cint {.importc.}
@@ -162,9 +162,9 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
   proc mz_deflateBound*(pStream: mz_streamp; source_len: mz_ulong): mz_ulong {.importc.}
   # Single-call compression functions mz_compress() and mz_compress2():
   # Returns MZ_OK on success, or one of the error codes from mz_deflate() on failure.
-  proc mz_compress*(pDest: ptr cuchar; pDest_len: ptr mz_ulong; 
+  proc mz_compress*(pDest: ptr cuchar; pDest_len: ptr mz_ulong;
                     pSource: ptr cuchar; source_len: mz_ulong): cint {.importc.}
-  proc mz_compress2*(pDest: ptr cuchar; pDest_len: ptr mz_ulong; 
+  proc mz_compress2*(pDest: ptr cuchar; pDest_len: ptr mz_ulong;
                      pSource: ptr cuchar; source_len: mz_ulong; level: cint): cint {.importc.}
   # mz_compressBound() returns a (very) conservative upper bound on the amount of data that could be generated by calling mz_compress().
   proc mz_compressBound*(source_len: mz_ulong): mz_ulong {.importc.}
@@ -192,14 +192,14 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
   proc mz_inflateEnd*(pStream: mz_streamp): cint {.importc.}
   # Single-call decompression.
   # Returns MZ_OK on success, or one of the error codes from mz_inflate() on failure.
-  proc mz_uncompress*(pDest: ptr cuchar; pDest_len: ptr mz_ulong; 
+  proc mz_uncompress*(pDest: ptr cuchar; pDest_len: ptr mz_ulong;
                       pSource: ptr cuchar; source_len: mz_ulong): cint {.importc.}
   # Returns a string description of the specified error code, or NULL if the error code is invalid.
   proc mz_error*(err: cint): cstring {.importc.}
   # Redefine zlib-compatible names to miniz equivalents, so miniz.c can be used as a drop-in replacement for the subset of zlib that miniz.c supports.
   # Define MINIZ_NO_ZLIB_COMPATIBLE_NAMES to disable zlib-compatibility if you use zlib in the same project.
-  when not(defined(MINIZ_NO_ZLIB_COMPATIBLE_NAMES)): 
-    type 
+  when not(defined(MINIZ_NO_ZLIB_COMPATIBLE_NAMES)):
+    type
       Byte* = cuchar
       uInt* = cuint
       uLong* = mz_ulong
@@ -211,7 +211,7 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
       uLongf* = uLong
       voidp* = pointer
       voidpc* = pointer
-    const 
+    const
       Z_NULL* = 0
       Z_NO_FLUSH* = MZ_NO_FLUSH
       Z_PARTIAL_FLUSH* = MZ_PARTIAL_FLUSH
@@ -275,7 +275,7 @@ when not(defined(MINIZ_NO_ZLIB_APIS)):
       #zlib_version* = mz_version()
 # ------------------- Types and macros
 
-type 
+type
   mz_uint8* = cuchar
   mz_int16* = cshort
   mz_uint16* = cushort
@@ -285,17 +285,17 @@ type
   mz_uint64* = culonglong
   mz_bool* = cint
 
-const 
+const
   MZ_FALSE* = (0)
   MZ_TRUE* = (1)
 
 # An attempt to work around MSVC's spammy "warning C4127: conditional expression is constant" message.
 
-#when defined(_MSC_VER): 
-#  const 
+#when defined(_MSC_VER):
+#  const
 #    MZ_MACRO_END* = while(0, 0)
-#else: 
-#  const 
+#else:
+#  const
 #    MZ_MACRO_END* = while(0)
 # ------------------- ZIP archive reading/writing
 
@@ -303,12 +303,12 @@ type #FC defininf missing types
   time_t = cint
   size_t = cint
 
-when not(defined(MINIZ_NO_ARCHIVE_APIS)): 
-  const 
+when not(defined(MINIZ_NO_ARCHIVE_APIS)):
+  const
     MZ_ZIP_MAX_IO_BUF_SIZE* = 64 * 1024
     MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE* = 260
     MZ_ZIP_MAX_ARCHIVE_FILE_COMMENT_SIZE* = 256
-  type 
+  type
     mz_zip_archive_file_stat* {.bycopy.} = object
       m_file_index*: mz_uint32
       m_central_dir_ofs*: mz_uint32
@@ -327,19 +327,19 @@ when not(defined(MINIZ_NO_ARCHIVE_APIS)):
       m_filename*: array[MZ_ZIP_MAX_ARCHIVE_FILENAME_SIZE, char]
       m_comment*: array[MZ_ZIP_MAX_ARCHIVE_FILE_COMMENT_SIZE, char]
 
-    mz_file_read_func* = proc (pOpaque: pointer; file_ofs: mz_uint64; 
+    mz_file_read_func* = proc (pOpaque: pointer; file_ofs: mz_uint64;
                                pBuf: pointer; n: csize): csize {.noconv.}
-    mz_file_write_func* = proc (pOpaque: pointer; file_ofs: mz_uint64; 
+    mz_file_write_func* = proc (pOpaque: pointer; file_ofs: mz_uint64;
                                 pBuf: pointer; n: csize): csize {.noconv.}
-  type 
-    mz_zip_internal_state_tag* = object 
-    
-  type 
+  type
+    mz_zip_internal_state_tag* = object
+
+  type
     mz_zip_internal_state* = mz_zip_internal_state_tag
-    mz_zip_mode* = enum 
-      MZ_ZIP_MODE_INVALID = 0, MZ_ZIP_MODE_READING = 1, MZ_ZIP_MODE_WRITING = 2, 
+    mz_zip_mode* = enum
+      MZ_ZIP_MODE_INVALID = 0, MZ_ZIP_MODE_READING = 1, MZ_ZIP_MODE_WRITING = 2,
       MZ_ZIP_MODE_WRITING_HAS_BEEN_FINALIZED = 3
-    mz_zip_archive* = object 
+    mz_zip_archive* = object
       m_archive_size*: mz_uint64
       m_central_directory_file_ofs*: mz_uint64
       m_total_files*: mz_uint
@@ -354,87 +354,87 @@ when not(defined(MINIZ_NO_ARCHIVE_APIS)):
       m_pIO_opaque*: pointer
       m_pState*: ptr mz_zip_internal_state
 
-    mz_zip_flags* {.size: sizeof(cint).} = enum 
-      MZ_ZIP_FLAG_CASE_SENSITIVE = 0x00000100, 
-      MZ_ZIP_FLAG_IGNORE_PATH = 0x00000200, 
-      MZ_ZIP_FLAG_COMPRESSED_DATA = 0x00000400, 
+    mz_zip_flags* {.size: sizeof(cint).} = enum
+      MZ_ZIP_FLAG_CASE_SENSITIVE = 0x00000100,
+      MZ_ZIP_FLAG_IGNORE_PATH = 0x00000200,
+      MZ_ZIP_FLAG_COMPRESSED_DATA = 0x00000400,
       MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY = 0x00000800
   # ZIP archive reading
   # Inits a ZIP archive reader.
   # These functions read and validate the archive's central directory.
-  proc mz_zip_reader_init*(pZip: ptr mz_zip_archive; size: mz_uint64; 
+  proc mz_zip_reader_init*(pZip: ptr mz_zip_archive; size: mz_uint64;
                            flags: mz_uint32): mz_bool {.importc.}
-  proc mz_zip_reader_init_mem*(pZip: ptr mz_zip_archive; pMem: pointer; 
+  proc mz_zip_reader_init_mem*(pZip: ptr mz_zip_archive; pMem: pointer;
                                size: csize; flags: mz_uint32): mz_bool {.importc.}
-  when not(defined(MINIZ_NO_STDIO)): 
-    proc mz_zip_reader_init_file*(pZip: ptr mz_zip_archive; pFilename: cstring; 
+  when not(defined(MINIZ_NO_STDIO)):
+    proc mz_zip_reader_init_file*(pZip: ptr mz_zip_archive; pFilename: cstring;
                                   flags: mz_uint32): mz_bool {.importc, cdecl.}
   # Returns the total number of files in the archive.
   proc mz_zip_reader_get_num_files*(pZip: ptr mz_zip_archive): mz_uint {.importc, cdecl.}
   # Returns detailed information about an archive file entry.
-  proc mz_zip_reader_file_stat*(pZip: ptr mz_zip_archive; file_index: mz_uint; 
+  proc mz_zip_reader_file_stat*(pZip: ptr mz_zip_archive; file_index: mz_uint;
                                 pStat: ptr mz_zip_archive_file_stat): mz_bool {.importc.}
   # Determines if an archive file entry is a directory entry.
-  proc mz_zip_reader_is_file_a_directory*(pZip: ptr mz_zip_archive; 
+  proc mz_zip_reader_is_file_a_directory*(pZip: ptr mz_zip_archive;
       file_index: mz_uint): mz_bool {.importc, cdecl.}
-  proc mz_zip_reader_is_file_encrypted*(pZip: ptr mz_zip_archive; 
+  proc mz_zip_reader_is_file_encrypted*(pZip: ptr mz_zip_archive;
                                         file_index: mz_uint): mz_bool {.importc.}
   # Retrieves the filename of an archive file entry.
   # Returns the number of bytes written to pFilename, or if filename_buf_size is 0 this function returns the number of bytes needed to fully store the filename.
-  proc mz_zip_reader_get_filename*(pZip: ptr mz_zip_archive; 
-                                   file_index: mz_uint; pFilename: cstring; 
+  proc mz_zip_reader_get_filename*(pZip: ptr mz_zip_archive;
+                                   file_index: mz_uint; pFilename: cstring;
                                    filename_buf_size: mz_uint): mz_uint {.importc, cdecl.}
   # Attempts to locates a file in the archive's central directory.
   # Valid flags: MZ_ZIP_FLAG_CASE_SENSITIVE, MZ_ZIP_FLAG_IGNORE_PATH
   # Returns -1 if the file cannot be found.
-  proc mz_zip_reader_locate_file*(pZip: ptr mz_zip_archive; pName: cstring; 
+  proc mz_zip_reader_locate_file*(pZip: ptr mz_zip_archive; pName: cstring;
                                   pComment: cstring; flags: mz_uint): cint {.importc, cdecl.}
   # Extracts a archive file to a memory buffer using no memory allocation.
-  proc mz_zip_reader_extract_to_mem_no_alloc*(pZip: ptr mz_zip_archive; 
-      file_index: mz_uint; pBuf: pointer; buf_size: csize; flags: mz_uint; 
+  proc mz_zip_reader_extract_to_mem_no_alloc*(pZip: ptr mz_zip_archive;
+      file_index: mz_uint; pBuf: pointer; buf_size: csize; flags: mz_uint;
       pUser_read_buf: pointer; user_read_buf_size: csize): mz_bool {.importc.}
-  proc mz_zip_reader_extract_file_to_mem_no_alloc*(pZip: ptr mz_zip_archive; 
-      pFilename: cstring; pBuf: pointer; buf_size: csize; flags: mz_uint; 
+  proc mz_zip_reader_extract_file_to_mem_no_alloc*(pZip: ptr mz_zip_archive;
+      pFilename: cstring; pBuf: pointer; buf_size: csize; flags: mz_uint;
       pUser_read_buf: pointer; user_read_buf_size: csize): mz_bool {.importc.}
   # Extracts a archive file to a memory buffer.
-  proc mz_zip_reader_extract_to_mem*(pZip: ptr mz_zip_archive; 
-                                     file_index: mz_uint; pBuf: pointer; 
+  proc mz_zip_reader_extract_to_mem*(pZip: ptr mz_zip_archive;
+                                     file_index: mz_uint; pBuf: pointer;
                                      buf_size: csize; flags: mz_uint): mz_bool {.importc.}
-  proc mz_zip_reader_extract_file_to_mem*(pZip: ptr mz_zip_archive; 
+  proc mz_zip_reader_extract_file_to_mem*(pZip: ptr mz_zip_archive;
       pFilename: cstring; pBuf: pointer; buf_size: csize; flags: mz_uint): mz_bool {.importc.}
   # Extracts a archive file to a dynamically allocated heap buffer.
-  proc mz_zip_reader_extract_to_heap*(pZip: ptr mz_zip_archive; 
-                                      file_index: mz_uint; pSize: ptr csize; 
+  proc mz_zip_reader_extract_to_heap*(pZip: ptr mz_zip_archive;
+                                      file_index: mz_uint; pSize: ptr csize;
                                       flags: mz_uint): pointer {.importc.}
-  proc mz_zip_reader_extract_file_to_heap*(pZip: ptr mz_zip_archive; 
+  proc mz_zip_reader_extract_file_to_heap*(pZip: ptr mz_zip_archive;
       pFilename: cstring; pSize: ptr csize; flags: mz_uint): pointer {.importc.}
   # Extracts a archive file using a callback function to output the file's data.
-  proc mz_zip_reader_extract_to_callback*(pZip: ptr mz_zip_archive; 
-      file_index: mz_uint; pCallback: mz_file_write_func; pOpaque: pointer; 
+  proc mz_zip_reader_extract_to_callback*(pZip: ptr mz_zip_archive;
+      file_index: mz_uint; pCallback: mz_file_write_func; pOpaque: pointer;
       flags: mz_uint): mz_bool {.importc.}
-  proc mz_zip_reader_extract_file_to_callback*(pZip: ptr mz_zip_archive; 
-      pFilename: cstring; pCallback: mz_file_write_func; pOpaque: pointer; 
+  proc mz_zip_reader_extract_file_to_callback*(pZip: ptr mz_zip_archive;
+      pFilename: cstring; pCallback: mz_file_write_func; pOpaque: pointer;
       flags: mz_uint): mz_bool {.importc.}
-  when not(defined(MINIZ_NO_STDIO)): 
+  when not(defined(MINIZ_NO_STDIO)):
     # Extracts a archive file to a disk file and sets its last accessed and modified times.
     # This function only extracts files, not archive directory records.
-    proc mz_zip_reader_extract_to_file*(pZip: ptr mz_zip_archive; 
-                                        file_index: mz_uint; 
+    proc mz_zip_reader_extract_to_file*(pZip: ptr mz_zip_archive;
+                                        file_index: mz_uint;
                                         pDst_filename: cstring; flags: mz_uint): mz_bool {.importc, cdecl.}
-    proc mz_zip_reader_extract_file_to_file*(pZip: ptr mz_zip_archive; 
+    proc mz_zip_reader_extract_file_to_file*(pZip: ptr mz_zip_archive;
         pArchive_filename: cstring; pDst_filename: cstring; flags: mz_uint): mz_bool {.importc.}
   # Ends archive reading, freeing all allocations, and closing the input archive file if mz_zip_reader_init_file() was used.
   proc mz_zip_reader_end*(pZip: ptr mz_zip_archive): mz_bool {.importc, cdecl.}
   # ZIP archive writing
-  when not(defined(MINIZ_NO_ARCHIVE_WRITING_APIS)): 
+  when not(defined(MINIZ_NO_ARCHIVE_WRITING_APIS)):
     # Inits a ZIP archive writer.
     proc mz_zip_writer_init*(pZip: ptr mz_zip_archive; existing_size: mz_uint64): mz_bool  {.importc.}
-    proc mz_zip_writer_init_heap*(pZip: ptr mz_zip_archive; 
-                                  size_to_reserve_at_beginning: csize; 
+    proc mz_zip_writer_init_heap*(pZip: ptr mz_zip_archive;
+                                  size_to_reserve_at_beginning: csize;
                                   initial_allocation_size: csize): mz_bool {.importc.}
-    when not(defined(MINIZ_NO_STDIO)): 
-      proc mz_zip_writer_init_file*(pZip: ptr mz_zip_archive; 
-                                    pFilename: cstring; 
+    when not(defined(MINIZ_NO_STDIO)):
+      proc mz_zip_writer_init_file*(pZip: ptr mz_zip_archive;
+                                    pFilename: cstring;
                                     size_to_reserve_at_beginning: mz_uint64): mz_bool {.importc, cdecl.}
     # Converts a ZIP archive reader object into a writer object, to allow efficient in-place file appends to occur on an existing archive.
     # For archives opened using mz_zip_reader_init_file, pFilename must be the archive's filename so it can be reopened for writing. If the file can't be reopened, mz_zip_reader_end() will be called.
@@ -442,38 +442,38 @@ when not(defined(MINIZ_NO_ARCHIVE_APIS)):
     # Finally, for archives opened using mz_zip_reader_init, the mz_zip_archive's user provided m_pWrite function cannot be NULL.
     # Note: In-place archive modification is not recommended unless you know what you're doing, because if execution stops or something goes wrong before
     # the archive is finalized the file's central directory will be hosed.
-    proc mz_zip_writer_init_from_reader*(pZip: ptr mz_zip_archive; 
+    proc mz_zip_writer_init_from_reader*(pZip: ptr mz_zip_archive;
         pFilename: cstring): mz_bool {.importc, cdecl.}
     # Adds the contents of a memory buffer to an archive. These functions record the current local time into the archive.
     # To add a directory entry, call this method with an archive name ending in a forwardslash with empty buffer.
     # level_and_flags - compression level (0-10, see MZ_BEST_SPEED, MZ_BEST_COMPRESSION, etc.) logically OR'd with zero or more mz_zip_flags, or just set to MZ_DEFAULT_COMPRESSION.
-    proc mz_zip_writer_add_mem*(pZip: ptr mz_zip_archive; 
-                                pArchive_name: cstring; pBuf: pointer; 
+    proc mz_zip_writer_add_mem*(pZip: ptr mz_zip_archive;
+                                pArchive_name: cstring; pBuf: pointer;
                                 buf_size: csize; level_and_flags: mz_uint): mz_bool {.importc.}
-    proc mz_zip_writer_add_mem_ex*(pZip: ptr mz_zip_archive; 
-                                   pArchive_name: cstring; pBuf: pointer; 
-                                   buf_size: csize; pComment: pointer; 
-                                   comment_size: mz_uint16; 
-                                   level_and_flags: mz_uint; 
-                                   uncomp_size: mz_uint64; 
+    proc mz_zip_writer_add_mem_ex*(pZip: ptr mz_zip_archive;
+                                   pArchive_name: cstring; pBuf: pointer;
+                                   buf_size: csize; pComment: pointer;
+                                   comment_size: mz_uint16;
+                                   level_and_flags: mz_uint;
+                                   uncomp_size: mz_uint64;
                                    uncomp_crc32: mz_uint32): mz_bool {.importc.}
-    when not(defined(MINIZ_NO_STDIO)): 
+    when not(defined(MINIZ_NO_STDIO)):
       # Adds the contents of a disk file to an archive. This function also records the disk file's modified time into the archive.
       # level_and_flags - compression level (0-10, see MZ_BEST_SPEED, MZ_BEST_COMPRESSION, etc.) logically OR'd with zero or more mz_zip_flags, or just set to MZ_DEFAULT_COMPRESSION.
-      proc mz_zip_writer_add_file*(pZip: ptr mz_zip_archive; 
-                                   pArchive_name: cstring; 
-                                   pSrc_filename: cstring; pComment: pointer; 
-                                   comment_size: mz_uint16; 
+      proc mz_zip_writer_add_file*(pZip: ptr mz_zip_archive;
+                                   pArchive_name: cstring;
+                                   pSrc_filename: cstring; pComment: pointer;
+                                   comment_size: mz_uint16;
                                    level_and_flags: mz_uint): mz_bool {.importc, cdecl.}
     # Adds a file to an archive by fully cloning the data from another archive.
     # This function fully clones the source file's compressed data (no recompression), along with its full filename, extra data, and comment fields.
-    proc mz_zip_writer_add_from_zip_reader*(pZip: ptr mz_zip_archive; 
+    proc mz_zip_writer_add_from_zip_reader*(pZip: ptr mz_zip_archive;
         pSource_zip: ptr mz_zip_archive; file_index: mz_uint): mz_bool {.importc.}
     # Finalizes the archive by writing the central directory records followed by the end of central directory record.
     # After an archive is finalized, the only valid call on the mz_zip_archive struct is mz_zip_writer_end().
     # An archive must be manually finalized by calling this function for it to be valid.
     proc mz_zip_writer_finalize_archive*(pZip: ptr mz_zip_archive): mz_bool {.importc, cdecl.}
-    proc mz_zip_writer_finalize_heap_archive*(pZip: ptr mz_zip_archive; 
+    proc mz_zip_writer_finalize_heap_archive*(pZip: ptr mz_zip_archive;
         pBuf: ptr pointer; pSize: ptr csize): mz_bool {.importc, cdecl.}
     # Ends archive writing, freeing all allocations, and closing the output file if mz_zip_writer_init_file() was used.
     # Note for the archive to be valid, it must have been finalized before ending.
@@ -481,12 +481,12 @@ when not(defined(MINIZ_NO_ARCHIVE_APIS)):
     # Misc. high-level helper functions:
     # mz_zip_add_mem_to_archive_file_in_place() efficiently (but not atomically) appends a memory blob to a ZIP archive.
     # level_and_flags - compression level (0-10, see MZ_BEST_SPEED, MZ_BEST_COMPRESSION, etc.) logically OR'd with zero or more mz_zip_flags, or just set to MZ_DEFAULT_COMPRESSION.
-    proc mz_zip_add_mem_to_archive_file_in_place*(pZip_filename: cstring; 
-        pArchive_name: cstring; pBuf: pointer; buf_size: csize; 
+    proc mz_zip_add_mem_to_archive_file_in_place*(pZip_filename: cstring;
+        pArchive_name: cstring; pBuf: pointer; buf_size: csize;
         pComment: pointer; comment_size: mz_uint16; level_and_flags: mz_uint): mz_bool {.importc.}
     # Reads a single file from an archive into a heap block.
     # Returns NULL on failure.
-    proc mz_zip_extract_archive_file_to_heap*(pZip_filename: cstring; 
+    proc mz_zip_extract_archive_file_to_heap*(pZip_filename: cstring;
         pArchive_name: cstring; pSize: ptr csize; zip_flags: mz_uint): pointer {.importc.}
 # ------------------- Low-level Decompression API Definitions
 # Decompression flags used by tinfl_decompress().
@@ -495,7 +495,7 @@ when not(defined(MINIZ_NO_ARCHIVE_APIS)):
 # TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF: If set, the output buffer is large enough to hold the entire decompressed stream. If clear, the output buffer is at least the size of the dictionary (typically 32KB).
 # TINFL_FLAG_COMPUTE_ADLER32: Force adler-32 checksum computation of the decompressed bytes.
 
-const 
+const
   TINFL_FLAG_PARSE_ZLIB_HEADER* = 1
   TINFL_FLAG_HAS_MORE_INPUT* = 2
   TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF* = 4
@@ -510,43 +510,43 @@ const
 #  *pOut_len will be set to the decompressed data's size, which could be larger than src_buf_len on uncompressible data.
 #  The caller must call mz_free() on the returned block when it's no longer needed.
 
-proc tinfl_decompress_mem_to_heap*(pSrc_buf: pointer; src_buf_len: csize; 
+proc tinfl_decompress_mem_to_heap*(pSrc_buf: pointer; src_buf_len: csize;
                                    pOut_len: ptr csize; flags: cint): pointer {.importc.}
 # tinfl_decompress_mem_to_mem() decompresses a block in memory to another block in memory.
 # Returns TINFL_DECOMPRESS_MEM_TO_MEM_FAILED on failure, or the number of bytes written on success.
 
-const 
+const
   TINFL_DECOMPRESS_MEM_TO_MEM_FAILED* = ((size_t)(- 1))
 
-proc tinfl_decompress_mem_to_mem*(pOut_buf: pointer; out_buf_len: csize; 
-                                  pSrc_buf: pointer; src_buf_len: csize; 
+proc tinfl_decompress_mem_to_mem*(pOut_buf: pointer; out_buf_len: csize;
+                                  pSrc_buf: pointer; src_buf_len: csize;
                                   flags: cint): csize {.importc.}
 # tinfl_decompress_mem_to_callback() decompresses a block in memory to an internal 32KB buffer, and a user provided callback function will be called to flush the buffer.
 # Returns 1 on success or 0 on failure.
 
-type 
+type
   tinfl_put_buf_func_ptr* = proc (pBuf: pointer; len: cint; pUser: pointer): cint {.noconv.}
 
-proc tinfl_decompress_mem_to_callback*(pIn_buf: pointer; 
-                                       pIn_buf_size: ptr csize; 
-                                       pPut_buf_func: tinfl_put_buf_func_ptr; 
+proc tinfl_decompress_mem_to_callback*(pIn_buf: pointer;
+                                       pIn_buf_size: ptr csize;
+                                       pPut_buf_func: tinfl_put_buf_func_ptr;
                                        pPut_buf_user: pointer; flags: cint): cint {.importc.}
-type 
-  tinfl_decompressor_tag* = object 
-  
+type
+  tinfl_decompressor_tag* = object
+
   tinfl_decompressor* = tinfl_decompressor_tag
 
 # Max size of LZ dictionary.
 
-const 
+const
   TINFL_LZ_DICT_SIZE* = 32768
 
 # Return status.
 
-type 
-  tinfl_status* {.size: sizeof(cint).} = enum 
-    TINFL_STATUS_BAD_PARAM = - 3, TINFL_STATUS_ADLER32_MISMATCH = - 2, 
-    TINFL_STATUS_FAILED = - 1, TINFL_STATUS_DONE = 0, 
+type
+  tinfl_status* {.size: sizeof(cint).} = enum
+    TINFL_STATUS_BAD_PARAM = - 3, TINFL_STATUS_ADLER32_MISMATCH = - 2,
+    TINFL_STATUS_FAILED = - 1, TINFL_STATUS_DONE = 0,
     TINFL_STATUS_NEEDS_MORE_INPUT = 1, TINFL_STATUS_HAS_MORE_OUTPUT = 2
 
 
@@ -555,19 +555,19 @@ type
 template tinfl_init*(r: typed): void=
   r.m_state = 0
 
-template tinfl_get_adler32*(r: typed): void= 
+template tinfl_get_adler32*(r: typed): void=
   (r).m_check_adler32
 
 # Main low-level decompressor coroutine function. This is the only function actually needed for decompression. All the other functions are just high-level helpers for improved usability.
 # This is a universal API, i.e. it can be used as a building block to build any desired higher level decompression API. In the limit case, it can be called once per every byte input or output.
 
-proc tinfl_decompress*(r: ptr tinfl_decompressor; pIn_buf_next: ptr mz_uint8; 
-                       pIn_buf_size: ptr csize; pOut_buf_start: ptr mz_uint8; 
-                       pOut_buf_next: ptr mz_uint8; pOut_buf_size: ptr csize; 
+proc tinfl_decompress*(r: ptr tinfl_decompressor; pIn_buf_next: ptr mz_uint8;
+                       pIn_buf_size: ptr csize; pOut_buf_start: ptr mz_uint8;
+                       pOut_buf_next: ptr mz_uint8; pOut_buf_size: ptr csize;
                        decomp_flags: mz_uint32): tinfl_status {.importc.}
 # Internal/private bits follow.
 
-const 
+const
   TINFL_MAX_HUFF_TABLES* = 3
   TINFL_MAX_HUFF_SYMBOLS_0* = 288
   TINFL_MAX_HUFF_SYMBOLS_1* = 32
@@ -575,28 +575,28 @@ const
   TINFL_FAST_LOOKUP_BITS* = 10
   TINFL_FAST_LOOKUP_SIZE* = 1 shl TINFL_FAST_LOOKUP_BITS
 
-type 
-  tinfl_huff_table* = object 
+type
+  tinfl_huff_table* = object
     m_code_size*: array[TINFL_MAX_HUFF_SYMBOLS_0, mz_uint8]
     m_look_up*: array[TINFL_FAST_LOOKUP_SIZE, mz_int16]
     m_tree*: array[TINFL_MAX_HUFF_SYMBOLS_0 * 2, mz_int16]
 
 
-when defined(MINIZ_HAS_64BIT_REGISTERS): 
-  const 
+when defined(MINIZ_HAS_64BIT_REGISTERS):
+  const
     TINFL_USE_64BIT_BITBUF* = 1
-when defined(TINFL_USE_64BIT_BITBUF): 
-  type 
+when defined(TINFL_USE_64BIT_BITBUF):
+  type
     tinfl_bit_buf_t* = mz_uint64
-  const 
+  const
     TINFL_BITBUF_SIZE* = (64)
-else: 
-  type 
+else:
+  type
     tinfl_bit_buf_t* = mz_uint32
-  const 
+  const
     TINFL_BITBUF_SIZE* = (32)
-type 
-  tinfl_decompressor_tag_obj* = object 
+type
+  tinfl_decompressor_tag_obj* = object
     m_state*: mz_uint32
     m_num_bits*: mz_uint32
     m_zhdr0*: mz_uint32
@@ -620,13 +620,13 @@ type
 # ------------------- Low-level Compression API Definitions
 # Set TDEFL_LESS_MEMORY to 1 to use less memory (compression will be slightly slower, and raw/dynamic blocks will be output more frequently).
 
-const 
+const
   TDEFL_LESS_MEMORY* = 0
 
 # tdefl_init() compression flags logically OR'd together (low 12 bits contain the max. number of probes per dictionary search):
 # TDEFL_DEFAULT_MAX_PROBES: The compressor defaults to 128 dictionary probes per dictionary search. 0=Huffman only, 1=Huffman+LZ (fastest/crap compression), 4095=Huffman+LZ (slowest/best compression).
 
-const 
+const
   TDEFL_HUFFMAN_ONLY* = 0
   TDEFL_DEFAULT_MAX_PROBES* = 128
   TDEFL_MAX_PROBES_MASK* = 0x00000FFF
@@ -641,7 +641,7 @@ const
 # TDEFL_FORCE_ALL_RAW_BLOCKS: Only use raw (uncompressed) deflate blocks.
 # The low 12 bits are reserved to control the max # of hash probes per dictionary lookup (see TDEFL_MAX_PROBES_MASK).
 
-const 
+const
   TDEFL_WRITE_ZLIB_HEADER* = 0x00001000
   TDEFL_COMPUTE_ADLER32* = 0x00002000
   TDEFL_GREEDY_PARSING_FLAG* = 0x00004000
@@ -661,17 +661,17 @@ const
 #  *pOut_len will be set to the compressed data's size, which could be larger than src_buf_len on uncompressible data.
 #  The caller must free() the returned block when it's no longer needed.
 
-proc tdefl_compress_mem_to_heap*(pSrc_buf: pointer; src_buf_len: csize; 
+proc tdefl_compress_mem_to_heap*(pSrc_buf: pointer; src_buf_len: csize;
                                  pOut_len: ptr csize; flags: cint): pointer {.importc.}
 # tdefl_compress_mem_to_mem() compresses a block in memory to another block in memory.
 # Returns 0 on failure.
 
-proc tdefl_compress_mem_to_mem*(pOut_buf: pointer; out_buf_len: csize; 
-                                pSrc_buf: pointer; src_buf_len: csize; 
+proc tdefl_compress_mem_to_mem*(pOut_buf: pointer; out_buf_len: csize;
+                                pSrc_buf: pointer; src_buf_len: csize;
                                 flags: cint): csize {.importc.}
 # Compresses an image to a compressed PNG file in memory.
 # On entry:
-#  pImage, w, h, and num_chans describe the image to compress. num_chans may be 1, 2, 3, or 4. 
+#  pImage, w, h, and num_chans describe the image to compress. num_chans may be 1, 2, 3, or 4.
 #  The image pitch in bytes per scanline will be w*num_chans. The leftmost pixel on the top scanline is stored first in memory.
 #  level may range from [0,10], use MZ_NO_COMPRESSION, MZ_BEST_SPEED, MZ_BEST_COMPRESSION, etc. or a decent default is MZ_DEFAULT_LEVEL
 #  If flip is true, the image will be flipped on the Y axis (useful for OpenGL apps).
@@ -680,21 +680,21 @@ proc tdefl_compress_mem_to_mem*(pOut_buf: pointer; out_buf_len: csize;
 #  *pLen_out will be set to the size of the PNG image file.
 #  The caller must mz_free() the returned heap block (which will typically be larger than *pLen_out) when it's no longer needed.
 
-proc tdefl_write_image_to_png_file_in_memory_ex*(pImage: pointer; w: cint; 
+proc tdefl_write_image_to_png_file_in_memory_ex*(pImage: pointer; w: cint;
     h: cint; num_chans: cint; pLen_out: ptr csize; level: mz_uint; flip: mz_bool): pointer {.importc.}
-proc tdefl_write_image_to_png_file_in_memory*(pImage: pointer; w: cint; h: cint; 
+proc tdefl_write_image_to_png_file_in_memory*(pImage: pointer; w: cint; h: cint;
     num_chans: cint; pLen_out: ptr csize): pointer {.importc.}
 # Output stream interface. The compressor uses this interface to write compressed data. It'll typically be called TDEFL_OUT_BUF_SIZE at a time.
 
-type 
+type
   tdefl_put_buf_func_ptr* = proc (pBuf: pointer; len: cint; pUser: pointer): mz_bool {.noconv.}
 
 # tdefl_compress_mem_to_output() compresses a block to an output stream. The above helpers use this function internally.
 
-proc tdefl_compress_mem_to_output*(pBuf: pointer; buf_len: csize; 
-                                   pPut_buf_func: tdefl_put_buf_func_ptr; 
+proc tdefl_compress_mem_to_output*(pBuf: pointer; buf_len: csize;
+                                   pPut_buf_func: tdefl_put_buf_func_ptr;
                                    pPut_buf_user: pointer; flags: cint): mz_bool {.importc.}
-const 
+const
   TDEFL_MAX_HUFF_TABLES* = 3
   TDEFL_MAX_HUFF_SYMBOLS_0* = 288
   TDEFL_MAX_HUFF_SYMBOLS_1* = 32
@@ -706,8 +706,8 @@ const
 
 # TDEFL_OUT_BUF_SIZE MUST be large enough to hold a single entire compressed output block (using static/fixed Huffman codes).
 
-when TDEFL_LESS_MEMORY > 0: 
-  const 
+when TDEFL_LESS_MEMORY > 0:
+  const
     TDEFL_LZ_CODE_BUF_SIZE* = 24 * 1024
     TDEFL_OUT_BUF_SIZE* = (TDEFL_LZ_CODE_BUF_SIZE * 13) div 10
     TDEFL_MAX_HUFF_SYMBOLS* = 288
@@ -715,8 +715,8 @@ when TDEFL_LESS_MEMORY > 0:
     TDEFL_LEVEL1_HASH_SIZE_MASK* = 4095
     TDEFL_LZ_HASH_SHIFT* = (TDEFL_LZ_HASH_BITS + 2) div 3
     TDEFL_LZ_HASH_SIZE* = 1 shl TDEFL_LZ_HASH_BITS
-else: 
-  const 
+else:
+  const
     TDEFL_LZ_CODE_BUF_SIZE* = 64 * 1024
     TDEFL_OUT_BUF_SIZE* = (TDEFL_LZ_CODE_BUF_SIZE * 13) div 10
     TDEFL_MAX_HUFF_SYMBOLS* = 288
@@ -726,24 +726,24 @@ else:
     TDEFL_LZ_HASH_SIZE* = 1 shl TDEFL_LZ_HASH_BITS
 # The low-level tdefl functions below may be used directly if the above helper functions aren't flexible enough. The low-level functions don't make any heap allocations, unlike the above helper functions.
 
-type 
-  tdefl_status* {.size: sizeof(cint).} = enum 
-    TDEFL_STATUS_BAD_PARAM = - 2, TDEFL_STATUS_PUT_BUF_FAILED = - 1, 
+type
+  tdefl_status* {.size: sizeof(cint).} = enum
+    TDEFL_STATUS_BAD_PARAM = - 2, TDEFL_STATUS_PUT_BUF_FAILED = - 1,
     TDEFL_STATUS_OKAY = 0, TDEFL_STATUS_DONE = 1
 
 
 # Must map to MZ_NO_FLUSH, MZ_SYNC_FLUSH, etc. enums
 
-type 
-  tdefl_flush* {.size: sizeof(cint).} = enum 
-    TDEFL_NO_FLUSH = 0, TDEFL_SYNC_FLUSH = 2, TDEFL_FULL_FLUSH = 3, 
+type
+  tdefl_flush* {.size: sizeof(cint).} = enum
+    TDEFL_NO_FLUSH = 0, TDEFL_SYNC_FLUSH = 2, TDEFL_FULL_FLUSH = 3,
     TDEFL_FINISH = 4
 
 
 # tdefl's compression state structure.
 
-type 
-  tdefl_compressor* = object 
+type
+  tdefl_compressor* = object
     m_pPut_buf_func*: tdefl_put_buf_func_ptr
     m_pPut_buf_user*: pointer
     m_flags*: mz_uint
@@ -780,11 +780,11 @@ type
     m_src_buf_left*: csize
     m_out_buf_ofs*: csize
     m_dict*: array[TDEFL_LZ_DICT_SIZE + TDEFL_MAX_MATCH_LEN - 1, mz_uint8]
-    m_huff_count*: array[TDEFL_MAX_HUFF_SYMBOLS, 
+    m_huff_count*: array[TDEFL_MAX_HUFF_SYMBOLS,
                          array[TDEFL_MAX_HUFF_TABLES, mz_uint16]]
-    m_huff_codes*: array[TDEFL_MAX_HUFF_SYMBOLS, 
+    m_huff_codes*: array[TDEFL_MAX_HUFF_SYMBOLS,
                          array[TDEFL_MAX_HUFF_TABLES, mz_uint16]]
-    m_huff_code_sizes*: array[TDEFL_MAX_HUFF_SYMBOLS, 
+    m_huff_code_sizes*: array[TDEFL_MAX_HUFF_SYMBOLS,
                               array[TDEFL_MAX_HUFF_TABLES, mz_uint8]]
     m_lz_code_buf*: array[TDEFL_LZ_CODE_BUF_SIZE, mz_uint8]
     m_next*: array[TDEFL_LZ_DICT_SIZE, mz_uint16]
@@ -798,28 +798,28 @@ type
 # If pBut_buf_func is NULL the user should always call the tdefl_compress() API.
 # flags: See the above enums (TDEFL_HUFFMAN_ONLY, TDEFL_WRITE_ZLIB_HEADER, etc.)
 
-proc tdefl_init*(d: ptr tdefl_compressor; pPut_buf_func: tdefl_put_buf_func_ptr; 
+proc tdefl_init*(d: ptr tdefl_compressor; pPut_buf_func: tdefl_put_buf_func_ptr;
                  pPut_buf_user: pointer; flags: cint): tdefl_status {.importc.}
 # Compresses a block of data, consuming as much of the specified input buffer as possible, and writing as much compressed data to the specified output buffer as possible.
 
-proc tdefl_compress*(d: ptr tdefl_compressor; pIn_buf: pointer; 
-                     pIn_buf_size: ptr csize; pOut_buf: pointer; 
+proc tdefl_compress*(d: ptr tdefl_compressor; pIn_buf: pointer;
+                     pIn_buf_size: ptr csize; pOut_buf: pointer;
                      pOut_buf_size: ptr csize; flush: tdefl_flush): tdefl_status {.importc.}
 # tdefl_compress_buffer() is only usable when the tdefl_init() is called with a non-NULL tdefl_put_buf_func_ptr.
 # tdefl_compress_buffer() always consumes the entire input buffer.
 
-proc tdefl_compress_buffer*(d: ptr tdefl_compressor; pIn_buf: pointer; 
+proc tdefl_compress_buffer*(d: ptr tdefl_compressor; pIn_buf: pointer;
                             in_buf_size: csize; flush: tdefl_flush): tdefl_status {.importc.}
 proc tdefl_get_prev_return_status*(d: ptr tdefl_compressor): tdefl_status {.importc.}
 proc tdefl_get_adler32*(d: ptr tdefl_compressor): mz_uint32 {.importc.}
 # Can't use tdefl_create_comp_flags_from_zip_params if MINIZ_NO_ZLIB_APIS isn't defined, because it uses some of its macros.
 
-when not(defined(MINIZ_NO_ZLIB_APIS)): 
+when not(defined(MINIZ_NO_ZLIB_APIS)):
   # Create tdefl_compress() flags given zlib-style compression parameters.
   # level may range from [0,10] (where 10 is absolute max compression, but may be much slower on some files)
   # window_bits may be -15 (raw deflate) or 15 (zlib)
   # strategy may be either MZ_DEFAULT_STRATEGY, MZ_FILTERED, MZ_HUFFMAN_ONLY, MZ_RLE, or MZ_FIXED
-  proc tdefl_create_comp_flags_from_zip_params*(level: cint; window_bits: cint; 
+  proc tdefl_create_comp_flags_from_zip_params*(level: cint; window_bits: cint;
       strategy: cint): mz_uint {.importc.}
 
 ### Public Library
@@ -907,7 +907,7 @@ iterator pairs*(zip: var Zip): (int, string) =
     if zip.c.addr.mz_zip_reader_is_file_a_directory(i.mz_uint) == MZ_TRUE: continue
     yield (i, zip.get_file_name(i))
 
-proc file_index_inexact(zip: var Zip, path: string): int = 
+proc file_index_inexact(zip: var Zip, path: string): int =
   # returns file index per file path. Tries inexact search if exact search fails.
   # Throws exception if path is ambigous
   result = zip.c.addr.mz_zip_reader_locate_file(path, "", 0)
