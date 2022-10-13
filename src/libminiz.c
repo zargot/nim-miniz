@@ -2889,7 +2889,7 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, 
     #define MZ_FTELL64 ftello64
     #define MZ_FSEEK64 fseeko64
     #define MZ_FILE_STAT_STRUCT _stat
-    #define MZ_FILE_STAT _stat
+    #define MZ_FILE_STAT _wstat // widestring
     #define MZ_FFLUSH fflush
     #define MZ_FREOPEN(f, m, s) freopen(f, m, s)
     #define MZ_DELETE_FILE remove
@@ -2943,6 +2943,13 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, 
     #define MZ_DELETE_FILE remove
   #endif // #ifdef _MSC_VER
 #endif // #ifdef MINIZ_NO_STDIO
+
+// widestring support for win32
+#if defined(__MINGW32__)
+  #define MZ_FOPEN_READ(f) _wfopen(f, L"rb")
+#else
+  #define MZ_FOPEN_READ(f) MZ_FOPEN(f, "rb")
+#endif
 
 #define MZ_TOLOWER(c) ((((c) >= 'A') && ((c) <= 'Z')) ? ((c) - 'A' + 'a') : (c))
 
@@ -3062,11 +3069,9 @@ static mz_bool mz_zip_get_file_modified_time(const char *pFilename, mz_uint16 *p
 #ifdef MINIZ_NO_TIME
   (void)pFilename; *pDOS_date = *pDOS_time = 0;
 #else
-  /* struct MZ_FILE_STAT_STRUCT file_stat; */
-  struct _stat file_stat;
+  struct MZ_FILE_STAT_STRUCT file_stat;
   // On Linux with x86 glibc, this call will fail on large files (>= 0x80000000 bytes) unless you compiled with _LARGEFILE64_SOURCE. Argh.
-  /* if (MZ_FILE_STAT(pFilename, &file_stat) != 0) */
-  if (_wstat(pFilename, &file_stat) != 0)
+  if (MZ_FILE_STAT(pFilename, &file_stat) != 0)
     return MZ_FALSE;
   mz_zip_time_to_dos_time(file_stat.st_mtime, pDOS_time, pDOS_date);
 #endif // #ifdef MINIZ_NO_TIME
@@ -4444,8 +4449,7 @@ mz_bool mz_zip_writer_add_file(mz_zip_archive *pZip, const char *pArchive_name, 
   if (!mz_zip_get_file_modified_time(pSrc_filename, &dos_time, &dos_date))
     return MZ_FALSE;
 
-  /* pSrc_file = MZ_FOPEN(pSrc_filename, "rb"); */
-  pSrc_file = _wfopen(pSrc_filename, L"rb");
+  pSrc_file = MZ_FOPEN_READ(pSrc_filename);
   if (!pSrc_file)
     return MZ_FALSE;
   MZ_FSEEK64(pSrc_file, 0, SEEK_END);
